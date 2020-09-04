@@ -1,17 +1,34 @@
-<?php 
+<?php
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Factory\AppFactory;
+use Brmsdi\Page;
 
 require_once("vendor/autoload.php");
 
-$app = new \Slim\Slim();
+// Instantiate App
+$app = AppFactory::create();
 
-$app->config('debug', true);
+// Add error middleware
+$app->addErrorMiddleware(true, true, true);
 
-$app->get('/', function() {
-    
-	echo "OK2";
+// Add routes
+$app->get('/', function (Request $request, Response $response) {
+   // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
+	
+	$page = new Page();
 
+	$page->setTpl("index");
+
+
+
+    return $response;
 });
+/*
+$app->get('/hello/{name}', function (Request $request, Response $response, $args) {
+    $name = $args['name'];
+    $response->getBody()->write("Hello, $name");
+    return $response;
+}); */
 
 $app->run();
-
- ?>
