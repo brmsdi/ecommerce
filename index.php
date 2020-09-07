@@ -4,6 +4,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\PageAdmin;
+use Brmsdi\model\User;
+
+session_start();
 
 require_once("vendor/autoload.php");
 
@@ -28,11 +31,46 @@ $app->get('/', function (Request $request, Response $response) {
 $app->get('/admin', function (Request $request, Response $response) {
    // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
 	
+	User::verifyLogin();
+
 	$page = new PageAdmin();
 
 	$page->setTpl("index");
 
     return $response;
+});
+
+$app->get('/admin/login', function(Request $request, Response $response) 
+{
+	$page = new PageAdmin([
+		"header"=> false,
+		"footer"=> false
+	]);
+
+
+	$page->setTpl("login");
+
+	return $response;
+
+
+});
+
+$app->get('/admin/logout', function(Request $request, Response $response) 
+{
+	User::logout();
+
+	header("Location: /admin/login");
+	exit;
+	return $response;
+});
+
+$app->post('/admin/login', function(Request $request, Response $response) 
+{
+	User::login($_POST["login"], $_POST["password"]);
+
+	header("Location: /admin");
+	exit;
+
 });
 
 /*

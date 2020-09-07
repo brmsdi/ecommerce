@@ -1,3 +1,3 @@
 # Projeto E-commerce
 
-Projeto desenvolvido do zero e modificado em 2020!
+Projeto desenvolvido do zero e modificado com novas técnologias em 2020!
