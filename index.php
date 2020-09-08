@@ -64,6 +64,84 @@ $app->get('/admin/logout', function(Request $request, Response $response)
 	return $response;
 });
 
+$app->get('/admin/users', function(Request $request, Response $response) 
+{
+	User::verifyLogin();
+
+	$users = User::listAll();
+
+	$page = new PageAdmin();
+
+	$page->setTpl("users", array(
+		"users"=>$users
+	));
+	
+	return $response;
+});
+
+
+$app->get('/admin/users/create', function(Request $request, Response $response) 
+{
+	User::verifyLogin();
+
+	$page = new PageAdmin();
+
+	$page->setTpl("users-create");
+	
+	return $response;
+});
+
+$app->get('/admin/users/{iduser}/delete', function(Request $request, Response $response, $args) {
+	User::verifyLogin();
+	
+});
+
+$app->get('/admin/users/{iduser}', function(Request $request, Response $response, $args) 
+{
+	User::verifyLogin();
+
+	$page = new PageAdmin();
+
+	$user = new User();
+
+	$user->get((int) $args["iduser"] );
+
+	$page->setTpl("users-update", array(
+		"user"=>$user->getValues()
+	));
+	
+	return $response;
+});
+
+$app->post('/admin/users/create', function(Request $request, Response $response) {
+	User::verifyLogin();
+	
+	$user = new User();
+
+	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
+	$user->setData($_POST);
+	//var_dump($user);
+
+	$user->save();
+	//var_dump($request);
+	//echo "</br>";
+	//var_dump($response);
+	//exit;
+
+	header("Location: /admin/users");
+	exit;
+
+	return $response;
+
+});
+
+$app->post('/admin/users/{iduser}', function(Request $request, Response $response, $args) {
+	User::verifyLogin();
+	
+});
+
+
+
 $app->post('/admin/login', function(Request $request, Response $response) 
 {
 	User::login($_POST["login"], $_POST["password"]);

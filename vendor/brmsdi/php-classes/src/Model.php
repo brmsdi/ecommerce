@@ -13,7 +13,10 @@ class Model
 
 		switch ($method) {
 			case 'get':
-				# code...
+				
+				$value = $this->getValues();
+
+				return $value[$fieldname];
 				break;
 
 			case 'set':
@@ -30,10 +33,22 @@ class Model
 
 	public function setData($data = array())
 	{
-		foreach ($data as $key => $value) 
+		
+		try
 		{
-			$this->{"set".$key}($value);
+			foreach ($data as $key => $value) 
+			{
+				$this->{"set".$key}($value);
+			}
 			
+		}catch(Exception $erro) {
+			echo json_encode(array(
+			"message"=>$erro->getMessage(),
+			"line"=>$erro->getLine(),
+			"file"=>$erro->getFile(),
+			"code"=>$erro->getCode()
+			));
+
 		}
 	}
 
