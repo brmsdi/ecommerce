@@ -4,18 +4,23 @@ namespace Brmsdi\model;
 
 use Brmsdi\DB\Sql;
 use Brmsdi\Model;
+use Brmsdi\Mailer;
 
 class User extends Model {
 
 	const SESSION = "User";
-	define('SECRET_IV', pack('a16', 'senha'));
-	define('SECRET', pack('a16', 'senha'));
+	const SECRET_IV = "1234567891234567";
+	const SECRET = "1234567891234567";
+
+	//define('SECRET_IV', pack('a16', 'senha'));
+	//define('SECRET', pack('a16', 'senha'));
 
 	public static function login($login, $password) 
 	{
 		$sql = new Sql();
 
-		$results = $sql->select("SELECT * FROM tb_users WHERE deslogin = :LOGIN", array(
+		$results = $sql->select("SELECT * FROM tb_users 
+			WHERE deslogin = :LOGIN", array(
 			":LOGIN"=>$login
 		));
 
@@ -43,7 +48,6 @@ class User extends Model {
 
 		}
 
-
 	} 
 
 	public static function verifyLogin($inadmin = true) 
@@ -66,6 +70,8 @@ class User extends Model {
 
 	}
 
+	// FECHAR SESSÃO
+	// ENCERRAR LOGIN 
 	public static function logout()
 	{
 		$_SESSION[User::SESSION] = NULL;
@@ -108,20 +114,94 @@ class User extends Model {
 
 				$code = openssl_encrypt($dataRecovery["idrecovery"], 
 					'AES-128-CBC', 
-					SECRET,
-					OPENSSL_ZERO_PADDING,
-					SECRET_IV	
+					pack("a16", User::SECRET),
+					0,
+					pack("a16", User::SECRET_IV)	
 					);
 
-				$link = "http://www.ecommerce.com.br/admin/forgot/reset?$code";
+				$code = base64_encode($code);
+
+				$link = "http://www.ecommerce.com.br/admin/forgot/reset?code=$code";
+
+				$mailer = new Mailer($data["desemail"],
+					$data["desperson"],
+					"Redefinir senha do Ecommerce",
+					"forgot",
+					array(
+						"name"=>$data["desperson"],
+						"link"=>$link
+					));
+
+				
+				$mailer->send();
+
 			}
 
 		}
 
+		return $data;
+	}
 
 
+	// DECODIFICAR O CODIGO 
+	public function validForgotDecrypt($code)
+	{
+		$code = base64_decode($code);
 
-		return ;
+		$idRecovery = openssl_decrypt($code, 
+					'AES-128-CBC', 
+					pack("a16", User::SECRET),
+					0,
+					pack("a16", User::SECRET_IV)	
+					);
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_userspasswordsrecoveries a 
+			INNER JOIN tb_users b USING(iduser) 
+			INNER JOIN tb_persons c USING(idperson) 
+			WHERE a.idrecovery = :idRecovery 
+			AND a.dtrecovery IS NULL 
+			AND DATE_ADD(a.dtregister, INTERVAL 5 HOUR) >= NOW();
+			", array( 
+				":idRecovery"=>$idRecovery
+				));
+
+		if(count($results) === 0 ) 
+		{
+
+			throw new \Exception("Não foi possível recuperar a senha");
+		} else 
+		{
+			return $results[0];
+		}
+
+	}
+
+	//
+	public static function setForgotUsed($idrecovery)
+	{
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_userspasswordsrecoveries 
+			SET dtrecovery = NOW() 
+			WHERE idrecovery = :idrecovery", 
+			array(
+				":idrecovery"=>$idrecovery
+			));
+
+	}
+
+	public function setPassword($password)
+	{
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_users 
+			SET despassword = :password 
+			WHERE iduser = :iduser ", array(
+				":password"=>$password,
+				":iduser"=>$this->getiduser()
+			));
 	}
 
 	public static function listAll()

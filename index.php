@@ -21,11 +21,10 @@ $app->addErrorMiddleware(true, true, true);
 $app->get('/', function (Request $request, Response $response) {
    // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
 	
-	//$page = new Page();
+	$page = new Page();
 
-	//$page->setTpl("index");
+	$page->setTpl("index");
 
-	new Mailer("", "", "", "");
 
     return $response;
 });
@@ -43,6 +42,7 @@ $app->get('/admin', function (Request $request, Response $response) {
     return $response;
 });
 
+
 $app->get('/admin/login', function(Request $request, Response $response) 
 {
 	$page = new PageAdmin([
@@ -54,7 +54,6 @@ $app->get('/admin/login', function(Request $request, Response $response)
 	$page->setTpl("login");
 
 	return $response;
-
 
 });
 
@@ -83,7 +82,7 @@ $app->get('/admin/users', function(Request $request, Response $response)
 	return $response;
 });
 
-
+//  TELA DE CADASTRO DE USUÁRIO 
 $app->get('/admin/users/create', function(Request $request, Response $response) 
 {
 	User::verifyLogin();
@@ -129,7 +128,6 @@ $app->get('/admin/users/{iduser}', function(Request $request, Response $response
 // ROTA PARA ESQUECI A SENHA
 $app->get('/admin/forgot', function(Request $request, Response $response) 
 {
-	
 
 	$page = new PageAdmin([
 		"header"=>false,
@@ -141,6 +139,85 @@ $app->get('/admin/forgot', function(Request $request, Response $response)
 	return $response;
 });
 
+// Enviar Email para recuperação de senha
+$app->post('/admin/forgot', function(Request $request, Response $response) 
+{
+	
+	$user = User::getForgot($_POST["email"]);
+	callHomeScreen("admin/forgot/send");
+
+});
+
+// AVISO DE CONFIRMAÇÃO 
+$app->get('/admin/forgot/send', function(Request $request, Response $response) 
+{
+	
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-send");
+	
+	return $response;
+
+});
+
+
+// ROTA DO LINK DO E-MAIL 
+$app->get('/admin/forgot/reset', function(Request $request, Response $response) 
+{
+
+	$user = User::validForgotDecrypt($_GET["code"]);
+	
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-reset", array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+	
+	
+	return $response;
+
+});
+
+
+// ROTA PARA RECEBER A NOVA SENHA
+
+$app->post('/admin/forgot/reset', function(Request $request, Response $response) {
+	
+	$forgot = User::validForgotDecrypt($_POST["code"]);
+
+	User::setForgotUsed($forgot["idrecovery"]);
+
+	$user = new User();
+
+	$user->get((int) $forgot["iduser"] );
+
+	$pass = password_hash($_POST["password"], PASSWORD_DEFAULT, [
+		"cost"=>12
+	]);
+
+	$user->setPassword($pass);
+
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot-reset-success");
+	
+
+	return $response;
+
+});
+
+
+// POST PARA CADASTRAR USUÁRIO
 $app->post('/admin/users/create', function(Request $request, Response $response) {
 	User::verifyLogin();
 	
@@ -150,7 +227,11 @@ $app->post('/admin/users/create', function(Request $request, Response $response)
 	$user->setData($_POST);
 	//var_dump($user);
 
-	$user->save();
+	//$user->save();
+
+	echo $_POST["despassword"];
+	exit;
+
 	//var_dump($request);
 	//echo "</br>";
 	//var_dump($response);
@@ -191,14 +272,7 @@ $app->post('/admin/login', function(Request $request, Response $response)
 
 });
 
-$app->post('/admin/forgot', function(Request $request, Response $response) 
-{
-	$_POST["email"];
 
-	$user = User::getForgot($_POST["email"]);
-
-
-});
 
 //CHAMAR TELAS DA
 function callHomeScreen($root)
