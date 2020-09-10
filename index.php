@@ -60,6 +60,7 @@ $app->get('/admin/logout', function(Request $request, Response $response)
 	User::logout();
 
 	header("Location: /admin/login");
+	callHomeScreen("admin/login");
 	exit;
 	return $response;
 });
@@ -92,7 +93,16 @@ $app->get('/admin/users/create', function(Request $request, Response $response)
 });
 
 $app->get('/admin/users/{iduser}/delete', function(Request $request, Response $response, $args) {
+
 	User::verifyLogin();
+
+	$user = new User();
+
+	$user->get((int) $args["iduser"]);
+
+	$user->delete();
+
+	callHomeScreen("admin/users");
 	
 });
 
@@ -128,28 +138,48 @@ $app->post('/admin/users/create', function(Request $request, Response $response)
 	//var_dump($response);
 	//exit;
 
-	header("Location: /admin/users");
-	exit;
+	callHomeScreen("admin/users");
 
 	return $response;
 
 });
 
+//ATUALIZAR DADOS DO USUÁRIO NO BANCO
 $app->post('/admin/users/{iduser}', function(Request $request, Response $response, $args) {
 	User::verifyLogin();
+
+	$user = new User();
+
+	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
+
+	$user->get( (int) $args["iduser"] );
+
+	$user->setData($_POST);
+
+	$user->update();
+
+	callHomeScreen("admin/users");
+
+	return $response;
 	
 });
-
 
 
 $app->post('/admin/login', function(Request $request, Response $response) 
 {
 	User::login($_POST["login"], $_POST["password"]);
 
-	header("Location: /admin");
-	exit;
+	callHomeScreen("admin");
 
 });
+
+//Chamar telas principais da aplicação
+function callHomeScreen($root)
+{
+	header("Location: /".$root);
+	exit;
+
+}
 
 /*
 $app->get('/hello/{name}', function (Request $request, Response $response, $args) {

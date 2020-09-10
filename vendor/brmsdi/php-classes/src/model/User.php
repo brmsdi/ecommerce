@@ -99,6 +99,41 @@ class User extends Model {
 
 	}
 
+
+	//ATUALIZAR OS DADOS DO USUÁRIO NO BANCO.
+	public function update()
+	{
+		$sql = new Sql();
+
+		$results = $sql->select("CALL sp_usersupdate_save (:iduser, :desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
+				":iduser"=>$this->getiduser(),
+				":desperson"=>$this->getdesperson(),
+				":deslogin"=>$this->getdeslogin(),
+				":despassword"=>$this->getdespassword(),
+				":desemail"=>$this->getdesemail(),
+				":nrphone"=>$this->getnrphone(),
+				":inadmin"=>$this->getinadmin()
+			));
+
+		if(count($results) > 0)
+		{
+			$this->setData($results[0]);
+		} 
+
+	}
+
+	// DELETAR USUÁRIO DO BANCO DE DADOS
+
+	public function delete()
+	{
+		$sql = new Sql();
+
+		$sql->query("CALL sp_users_delete(:iduser)", array(
+			":iduser"=>$this->getiduser()
+		));
+
+	}
+
 	public function get($iduser)
 	{
 		$sql = new Sql();
