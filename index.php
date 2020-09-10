@@ -5,6 +5,7 @@ use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
+use Brmsdi\Mailer;
 
 session_start();
 
@@ -20,9 +21,11 @@ $app->addErrorMiddleware(true, true, true);
 $app->get('/', function (Request $request, Response $response) {
    // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
 	
-	$page = new Page();
+	//$page = new Page();
 
-	$page->setTpl("index");
+	//$page->setTpl("index");
+
+	new Mailer("", "", "", "");
 
     return $response;
 });
@@ -123,6 +126,21 @@ $app->get('/admin/users/{iduser}', function(Request $request, Response $response
 	return $response;
 });
 
+// ROTA PARA ESQUECI A SENHA
+$app->get('/admin/forgot', function(Request $request, Response $response) 
+{
+	
+
+	$page = new PageAdmin([
+		"header"=>false,
+		"footer"=>false
+	]);
+
+	$page->setTpl("forgot");
+	
+	return $response;
+});
+
 $app->post('/admin/users/create', function(Request $request, Response $response) {
 	User::verifyLogin();
 	
@@ -173,7 +191,16 @@ $app->post('/admin/login', function(Request $request, Response $response)
 
 });
 
-//Chamar telas principais da aplicação
+$app->post('/admin/forgot', function(Request $request, Response $response) 
+{
+	$_POST["email"];
+
+	$user = User::getForgot($_POST["email"]);
+
+
+});
+
+//CHAMAR TELAS DA
 function callHomeScreen($root)
 {
 	header("Location: /".$root);

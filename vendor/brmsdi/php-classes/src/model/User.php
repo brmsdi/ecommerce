@@ -8,6 +8,8 @@ use Brmsdi\Model;
 class User extends Model {
 
 	const SESSION = "User";
+	define('SECRET_IV', pack('a16', 'senha'));
+	define('SECRET', pack('a16', 'senha'));
 
 	public static function login($login, $password) 
 	{
@@ -68,6 +70,58 @@ class User extends Model {
 	{
 		$_SESSION[User::SESSION] = NULL;
 		
+	}
+
+
+	// REDEFINIR SENHA
+	public static function getForgot($email)
+	{
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_persons a
+		INNER JOIN tb_users b
+		USING(idperson)
+		WHERE a.desemail LIKE :email", array(
+			":email"=>$email
+		));
+
+		if(count($results) === 0)
+		{
+			throw new \Exception("Não foi possível recuperar a senha.");
+		} else 
+		{
+			$data = $results[0];
+
+			$results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
+				":iduser"=>$data["iduser"],
+				":desip"=>$_SERVER["REMOTE_ADDR"]
+			));
+
+			if(count($results2) === 0)
+			{
+				throw new \Exception("Não foi possível recuperar a senha.");
+
+			} else 
+			{
+				$dataRecovery = $results2[0];
+
+				$code = openssl_encrypt($dataRecovery["idrecovery"], 
+					'AES-128-CBC', 
+					SECRET,
+					OPENSSL_ZERO_PADDING,
+					SECRET_IV	
+					);
+
+				$link = "http://www.ecommerce.com.br/admin/forgot/reset?$code";
+			}
+
+		}
+
+
+
+
+		return ;
 	}
 
 	public static function listAll()
