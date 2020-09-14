@@ -11,12 +11,15 @@ class Model
 		$method = substr($name, 0, 3);
 		$fieldname = substr($name, 3, strlen($name));
 
+		//echo "c: " . $fieldname;
+		
+
 		switch ($method) {
 			case 'get':
-				
-				$value = $this->getValues();
 
-				return $value[$fieldname];
+				$value = $this->values[$fieldname];
+
+				return  (isset($value)) ? $value: NULL;
 				break;
 
 			case 'set':

@@ -1,15 +1,17 @@
 <?php
+
+require_once("vendor/autoload.php");
+
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
+use Brmsdi\model\Category;
 use Brmsdi\Mailer;
 
-session_start();
 
-require_once("vendor/autoload.php");
 
 // Instantiate App
 $app = AppFactory::create();
@@ -17,264 +19,16 @@ $app = AppFactory::create();
 // Add error middleware
 $app->addErrorMiddleware(true, true, true);
 
-// Add routes
-$app->get('/', function (Request $request, Response $response) {
-   // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
-	
-	$page = new Page();
+session_start();
 
-	$page->setTpl("index");
 
+require_once("site.php"); 
+require_once("admin.php");
+require_once("admin-users.php");
+require_once("admin-categories.php");
+require_once("admin-products.php");
 
-    return $response;
-});
-
-
-$app->get('/admin', function (Request $request, Response $response) {
-   // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
-	
-	User::verifyLogin();
-
-	$page = new PageAdmin();
-
-	$page->setTpl("index");
-
-    return $response;
-});
-
-
-$app->get('/admin/login', function(Request $request, Response $response) 
-{
-	$page = new PageAdmin([
-		"header"=> false,
-		"footer"=> false
-	]);
-
-
-	$page->setTpl("login");
-
-	return $response;
-
-});
-
-$app->get('/admin/logout', function(Request $request, Response $response) 
-{
-	User::logout();
-
-	header("Location: /admin/login");
-	callHomeScreen("admin/login");
-	exit;
-	return $response;
-});
-
-$app->get('/admin/users', function(Request $request, Response $response) 
-{
-	User::verifyLogin();
-
-	$users = User::listAll();
-
-	$page = new PageAdmin();
-
-	$page->setTpl("users", array(
-		"users"=>$users
-	));
-	
-	return $response;
-});
-
-//  TELA DE CADASTRO DE USUÁRIO 
-$app->get('/admin/users/create', function(Request $request, Response $response) 
-{
-	User::verifyLogin();
-
-	$page = new PageAdmin();
-
-	$page->setTpl("users-create");
-	
-	return $response;
-});
-
-$app->get('/admin/users/{iduser}/delete', function(Request $request, Response $response, $args) {
-
-	User::verifyLogin();
-
-	$user = new User();
-
-	$user->get((int) $args["iduser"]);
-
-	$user->delete();
-
-	callHomeScreen("admin/users");
-	
-});
-
-$app->get('/admin/users/{iduser}', function(Request $request, Response $response, $args) 
-{
-	User::verifyLogin();
-
-	$page = new PageAdmin();
-
-	$user = new User();
-
-	$user->get((int) $args["iduser"] );
-
-	$page->setTpl("users-update", array(
-		"user"=>$user->getValues()
-	));
-	
-	return $response;
-});
-
-// ROTA PARA ESQUECI A SENHA
-$app->get('/admin/forgot', function(Request $request, Response $response) 
-{
-
-	$page = new PageAdmin([
-		"header"=>false,
-		"footer"=>false
-	]);
-
-	$page->setTpl("forgot");
-	
-	return $response;
-});
-
-// Enviar Email para recuperação de senha
-$app->post('/admin/forgot', function(Request $request, Response $response) 
-{
-	
-	$user = User::getForgot($_POST["email"]);
-	callHomeScreen("admin/forgot/send");
-
-});
-
-// AVISO DE CONFIRMAÇÃO 
-$app->get('/admin/forgot/send', function(Request $request, Response $response) 
-{
-	
-	$page = new PageAdmin([
-		"header"=>false,
-		"footer"=>false
-	]);
-
-	$page->setTpl("forgot-send");
-	
-	return $response;
-
-});
-
-
-// ROTA DO LINK DO E-MAIL 
-$app->get('/admin/forgot/reset', function(Request $request, Response $response) 
-{
-
-	$user = User::validForgotDecrypt($_GET["code"]);
-	
-	$page = new PageAdmin([
-		"header"=>false,
-		"footer"=>false
-	]);
-
-	$page->setTpl("forgot-reset", array(
-		"name"=>$user["desperson"],
-		"code"=>$_GET["code"]
-	));
-	
-	
-	return $response;
-
-});
-
-
-// ROTA PARA RECEBER A NOVA SENHA
-
-$app->post('/admin/forgot/reset', function(Request $request, Response $response) {
-	
-	$forgot = User::validForgotDecrypt($_POST["code"]);
-
-	User::setForgotUsed($forgot["idrecovery"]);
-
-	$user = new User();
-
-	$user->get((int) $forgot["iduser"] );
-
-	$pass = password_hash($_POST["password"], PASSWORD_DEFAULT, [
-		"cost"=>12
-	]);
-
-	$user->setPassword($pass);
-
-	$page = new PageAdmin([
-		"header"=>false,
-		"footer"=>false
-	]);
-
-	$page->setTpl("forgot-reset-success");
-	
-
-	return $response;
-
-});
-
-
-// POST PARA CADASTRAR USUÁRIO
-$app->post('/admin/users/create', function(Request $request, Response $response) {
-	User::verifyLogin();
-	
-	$user = new User();
-
-	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
-	$user->setData($_POST);
-	//var_dump($user);
-
-	//$user->save();
-
-	echo $_POST["despassword"];
-	exit;
-
-	//var_dump($request);
-	//echo "</br>";
-	//var_dump($response);
-	//exit;
-
-	callHomeScreen("admin/users");
-
-	return $response;
-
-});
-
-//ATUALIZAR DADOS DO USUÁRIO NO BANCO
-$app->post('/admin/users/{iduser}', function(Request $request, Response $response, $args) {
-	User::verifyLogin();
-
-	$user = new User();
-
-	$_POST["inadmin"] = (isset($_POST["inadmin"]))?1:0;
-
-	$user->get( (int) $args["iduser"] );
-
-	$user->setData($_POST);
-
-	$user->update();
-
-	callHomeScreen("admin/users");
-
-	return $response;
-	
-});
-
-
-$app->post('/admin/login', function(Request $request, Response $response) 
-{
-	User::login($_POST["login"], $_POST["password"]);
-
-	callHomeScreen("admin");
-
-});
-
-
-
-//CHAMAR TELAS DA
+//CHAMAR TELAS
 function callHomeScreen($root)
 {
 	header("Location: /".$root);

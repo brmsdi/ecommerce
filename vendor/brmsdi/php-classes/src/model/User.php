@@ -143,7 +143,7 @@ class User extends Model {
 	}
 
 
-	// DECODIFICAR O CODIGO 
+	// DECODIFICAR O CODIGO DE RECUPERAÇÃO DE SENHA
 	public function validForgotDecrypt($code)
 	{
 		$code = base64_decode($code);
@@ -178,7 +178,7 @@ class User extends Model {
 
 	}
 
-	//
+	// REGISTRAR O USO DO LINK DE RECUPERAÇÃO DE SENHA 
 	public static function setForgotUsed($idrecovery)
 	{
 		$sql = new Sql();
@@ -192,6 +192,7 @@ class User extends Model {
 
 	}
 
+	// SALVAR HASH DE SENHA DO USUÁRIO 
 	public function setPassword($password)
 	{
 		$sql = new Sql();
@@ -211,6 +212,7 @@ class User extends Model {
 		return $sql->select("SELECT * FROM tb_users a INNER JOIN tb_persons b USING(idperson) ORDER BY desperson");
 	}
 
+	// SALVAR UM NOVO REGISTRO NO BANCO DE DADOS
 	public function save()
 	{
 		$sql = new Sql();
@@ -257,7 +259,6 @@ class User extends Model {
 	}
 
 	// DELETAR USUÁRIO DO BANCO DE DADOS
-
 	public function delete()
 	{
 		$sql = new Sql();
@@ -268,6 +269,7 @@ class User extends Model {
 
 	}
 
+	// BUSCAR REGISTRO PELO ID
 	public function get($iduser)
 	{
 		$sql = new Sql();
