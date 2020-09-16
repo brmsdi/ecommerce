@@ -20,6 +20,8 @@ class Sql {
 			Sql::PASSWORD
 		);
 
+
+
 	}
 
 	private function setParams($statement, $parameters = array())
@@ -62,6 +64,21 @@ class Sql {
 
 		return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
+	}
+
+	public function prepareTransaction()
+	{
+		$this->conn->beginTransaction();
+	}
+
+	public function cancelTransaction()
+	{
+		$this->conn->rollback();
+	}
+
+	public function confirmTransaction()
+	{
+		$this->conn->commit();
 	}
 
 }

@@ -14,6 +14,7 @@ class Product extends Model
 		$sql = new Sql();
 
 		return $sql->select("SELECT * FROM tb_products a ORDER BY desproduct");
+
 	}
 
 	// SALVAR UM NOVO REGISTRO NO BANCO DE DADOS
@@ -21,7 +22,8 @@ class Product extends Model
 	{
 		$sql = new Sql();
 
-		$results = $sql->select("CALL sp_products_save (:idproduct, :desproduct, :vlprice, :vlwidth, :vlheight, :vllength, :vlweight, :desurl)", array(
+
+		$results = $sql->select("CALL sp_products_save (:idproduct, :desproduct, :vlprice, :vlwidth, :vlheight, :vllength, :vlweight, :desurl, :desphoto)", array(
 				":idproduct"=>$this->getidproduct(),
 				":desproduct"=>$this->getdesproduct(),
 				":vlprice"=>$this->getvlprice(),
@@ -29,7 +31,8 @@ class Product extends Model
 				":vlheight"=>$this->getvlheight(),
 				":vllength"=>$this->getvllength(),
 				":vlweight"=>$this->getvlweight(),
-				":desurl"=>$this->getdesurl()
+				":desurl"=>$this->getdesurl(),
+				":desphoto"=>$this->getdesphoto()
 			));
 
 		if(count($results) > 0)
@@ -130,12 +133,9 @@ class Product extends Model
 
 		}
 
-		$this->setdesurl($url);
-
-		return $url;
+		$this->setdesphoto($url);
 
 	}
-
 
 	public function getValues()
 	{
@@ -147,6 +147,36 @@ class Product extends Model
 		return $values;
 
 	}
+
+
+	public function getFromURL($desurl)
+	{
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_products a
+			 WHERE a.desurl = :desurl", array(
+			 	":desurl"=>$desurl
+			 ));
+
+		$this->setData($results[0]);
+
+	}
+
+
+	public function getCategories()
+	{
+		$sql = new Sql();
+
+		return $sql->select("SELECT * FROM tb_products a 
+			INNER JOIN tb_productscategories b 
+			ON a.idproduct = b.idproduct 
+			INNER JOIN tb_categories c 
+            ON b.idcategory = c.idcategory 
+            WHERE b.idproduct = :idproduct", array(
+				":idproduct"=>$this->getidproduct()
+		));
+	}
+
 }
 
 

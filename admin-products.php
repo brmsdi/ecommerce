@@ -75,7 +75,6 @@ $app->get("/admin/products/{idproduct}", function(Request $request, Response $re
 
 	//echo json_encode($product->getValues());
 
-	
 
 	$page->setTpl("products-update", array(
 		"product"=>$product->getValues()

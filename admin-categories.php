@@ -7,6 +7,7 @@ use Brmsdi\Page;
 use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
 use Brmsdi\model\Category;
+use Brmsdi\model\Product;
 
 // ROTA PARA A TELA DE CATEGORIAS 
 $app->get('/admin/categories', function(Request $request, Response $response)
@@ -106,24 +107,75 @@ $app->get('/admin/categories/{idcategory}/delete', function(Request $request, Re
 });
 
 
-// ROTA PARA CATEGORIAS ESPECIFICAS NA TELA PRINCIPAL DA LOJA
-$app->get('/categories/{idcategory}', function(Request $request, Response $response, $args)
+// ROTA PARA TELA DE PRODUTOS POR CATEGORIA
+$app->get('/admin/categories/{idcategory}/products', function(Request $request, Response $response, $args)
 {
+
+	User::verifyLogin();
 
 	$category = new Category();
 
 	$category->get((int) $args["idcategory"]);
 
-	$page = new Page();
+	$page = new PageAdmin();
 
-	$page->setTpl("categories", [
-		"category"=>$category->getValues()
+	$page->setTpl("categories-products", [
+		"category"=>$category->getValues(), 
+		"productsRelated"=>$category->getRelated(),
+		"productsNotRelated"=>$category->getRelated(false)
+
 	]);
 
 	return $response;
 
 });
 
+
+// ROTA PARA ADICIONAR PRODUTO A CATEGIRIA
+$app->get('/admin/categories/{idcategory}/products/{idproduct}/add', function(Request $request, Response $response, $args)
+{
+
+	User::verifyLogin();
+
+	$category = new Category();
+
+	$category->get((int) $args["idcategory"]);
+
+	$product = new Product();
+
+	$product->get((int) $args["idproduct"]);
+
+	$category->addProduct($product);
+
+	callHomeScreen("admin/categories/".$category->getidcategory()."/products");
+
+	return $response;
+
+});
+
+
+// ROTA PARA REMOVER PRODUTO DA CATEGORIA
+$app->get('/admin/categories/{idcategory}/products/{idproduct}/remove', function(Request $request, Response $response, $args)
+{
+
+	User::verifyLogin();
+
+	$category = new Category();
+
+	$category->get((int) $args["idcategory"]);
+
+	$product = new Product();
+
+	$product->get((int) $args["idproduct"]);
+
+
+	$category->removeProduct($product);
+
+	callHomeScreen("admin/categories/".$category->getidcategory()."/products");
+
+	return $response;
+
+});
 
 
 ?>
