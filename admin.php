@@ -34,11 +34,11 @@ $app->get('/admin/login', function(Request $request, Response $response)
 
 });
 
+// ROTA PARA SE DESLOGAR DO SISTEMA
 $app->get('/admin/logout', function(Request $request, Response $response) 
 {
 	User::logout();
 
-	header("Location: /admin/login");
 	callHomeScreen("admin/login");
 
 	return $response;

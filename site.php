@@ -7,7 +7,9 @@ use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\model\Product;
 use Brmsdi\model\Category;
+use Brmsdi\model\User;
 use Brmsdi\model\Cart;
+
 
 	// Add routes
 $app->get('/', function (Request $request, Response $response) {
@@ -85,17 +87,107 @@ $app->get("/cart", function(Request $request, Response $response, $args )
 
 	$cart = new Cart();
 
-	$cart->getFromSession();
+	$cart = Cart::getFromSession();
 
 	$page = new Page();
 
-	$page->setTpl("cart");
+	$page->setTpl("cart", [
+		"cart"=>$cart->getValues(),
+		"products"=>$cart->getProducts(), 
+		"error"=>Cart::getMsgError()
+		]);
 
 
 	return $response;
 
 });
 
+// ROTA PARA ADICIONAR PRODUTO NO CARRINHO
+$app->get("/cart/{idproduct}/add", function(Request $request, Response $response, $args ) 
+{
+
+	$quantity = (isset($_GET["quantity"])) ? (int) $_GET["quantity"] : 1;
+
+	$product = new Product();
+
+	$product->get((int) $args["idproduct"]);
+
+	
+	$cart = new Cart();
+		
+	$cart = Cart::getFromSession();
+
+	for($i = 0; $i < $quantity; $i++)
+	{
+		$cart->addProduct($product);
+
+	}	
+
+
+	callHomeScreen("cart");
+
+	return $response;
+
+});
+
+// ROTA PARA REMOVER PRODUTO NO CARRINHO
+$app->get("/cart/{idproduct}/minus", function(Request $request, Response $response, $args ) 
+{
+
+	$product = new Product();
+
+	$product->get((int) $args["idproduct"]);
+
+
+	$cart = new Cart();
+
+	$cart = Cart::getFromSession();
+
+	//echo json_encode($cart->getValues());
+	//exit;
+
+	$cart->removeProduct($product);
+
+
+	callHomeScreen("cart");
+
+	return $response;
+
+});
+
+// ROTA PARA REMOVER TODOS OS PRODUTOS NO CARRINHO
+$app->get("/cart/{idproduct}/remove", function(Request $request, Response $response, $args ) 
+{
+
+	$product = new Product();
+
+	$product->get((int) $args["idproduct"]);
+
+	$cart = new Cart();
+
+	$cart = Cart::getFromSession();
+
+	$cart->removeProduct($product, true);
+
+	callHomeScreen("cart");
+
+	return $response;
+});
+
+// CALCULAR FRETE 
+
+$app->post("/cart/freight", function(Request $request, Response $response) 
+{
+	$cart = new Cart();
+
+	$cart = Cart::getFromSession();
+
+	$cart->setFreight($_POST["zipcode"]);
+
+	callHomeScreen("cart");
+	return $response;
+
+});
 
 
 ?>
