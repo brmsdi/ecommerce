@@ -21,12 +21,13 @@ $app->addErrorMiddleware(true, true, true);
 
 session_start();
 
-
+require_once("functions.php");
 require_once("site.php"); 
 require_once("admin.php");
 require_once("admin-users.php");
 require_once("admin-categories.php");
 require_once("admin-products.php");
+require_once("site-users.php");
 
 //CHAMAR TELAS
 function callHomeScreen($root)

@@ -119,9 +119,8 @@ $app->post('/admin/forgot/reset', function(Request $request, Response $response)
 
 	$user->get((int) $forgot["iduser"] );
 
-	$pass = password_hash($_POST["password"], PASSWORD_DEFAULT, [
-		"cost"=>12
-	]);
+	$pass = User::getPasswordHash($_POST["password"]); 
+	
 
 	$user->setPassword($pass);
 
@@ -146,6 +145,8 @@ $app->post('/admin/login', function(Request $request, Response $response)
 	callHomeScreen("admin");
 
 });
+
+
 
 
 ?>

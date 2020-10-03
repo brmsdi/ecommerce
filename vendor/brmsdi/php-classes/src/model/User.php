@@ -11,6 +11,9 @@ class User extends Model {
 	const SESSION = "User";
 	const SECRET_IV = "1234567891234567";
 	const SECRET = "1234567891234567";
+	const SESSION_ERROR = "userError";
+	const ERROR_REGISTER = "userErrorRegister";
+	const SUCCESS = "userMsgSuccess";
 
 	//define('SECRET_IV', pack('a16', 'senha'));
 	//define('SECRET', pack('a16', 'senha'));
@@ -65,8 +68,8 @@ class User extends Model {
 	{
 		$sql = new Sql();
 
-		$results = $sql->select("SELECT * FROM tb_users 
-			WHERE deslogin = :LOGIN", array(
+		$results = $sql->select("SELECT
+			* from tb_users a INNER JOIN tb_persons b ON a.idperson = b.idperson WHERE a.deslogin = :LOGIN", array(
 			":LOGIN"=>$login
 		));
 
@@ -100,7 +103,13 @@ class User extends Model {
 	{
 		if(!User::checkLogin($inadmin))
 		{
-			header("Location: /admin/login");
+			if($inadmin)
+			{
+				header("Location: /admin/login");
+				
+			} else {
+				header("Location: /login");
+			}
 			exit;
 
 		}
@@ -117,7 +126,7 @@ class User extends Model {
 
 
 	// REDEFINIR SENHA
-	public static function getForgot($email)
+	public static function getForgot($email, $inadmin = true)
 	{
 
 		$sql = new Sql();
@@ -158,7 +167,15 @@ class User extends Model {
 
 				$code = base64_encode($code);
 
-				$link = "http://www.ecommerce.com.br/admin/forgot/reset?code=$code";
+				if($inadmin === true)
+				{
+					$link = "http://www.ecommerce.com.br/admin/forgot/reset?code=$code";
+				} else 
+				{
+					$link = "http://www.ecommerce.com.br/forgot/reset?code=$code";
+				}
+
+				
 
 				$mailer = new Mailer($data["desemail"],
 					$data["desperson"],
@@ -242,6 +259,16 @@ class User extends Model {
 			));
 	}
 
+	// CRIAR HASH DE SENHA PARA SALVAR NO BANCO!
+	public static function getPasswordHash($pass)
+	{
+		return password_hash($pass, PASSWORD_DEFAULT, [
+			"cost"=>12
+		]);
+
+	}
+
+	// LISTAR TODOS OS USUÁRIOS DO BANCO!
 	public static function listAll()
 	{
 		$sql = new Sql();
@@ -257,7 +284,7 @@ class User extends Model {
 		$results = $sql->select("CALL sp_users_save (:desperson, :deslogin, :despassword, :desemail, :nrphone, :inadmin)", array(
 				":desperson"=>$this->getdesperson(),
 				":deslogin"=>$this->getdeslogin(),
-				":despassword"=>$this->getdespassword(),
+				":despassword"=>User::getPasswordHash($this->getdespassword()),
 				":desemail"=>$this->getdesemail(),
 				":nrphone"=>$this->getnrphone(),
 				":inadmin"=>$this->getinadmin()
@@ -316,6 +343,96 @@ class User extends Model {
 
 		$this->setData($results[0]);
 	}
+
+	// SETA O ERRO NA SESSÃO
+	public static function setMsgError($msg)
+	{
+		$_SESSION[User::SESSION_ERROR] = $msg;
+
+	}
+
+	// RETORNA A MENSAGEM DE ERRO NA SESSÃO
+	public static function getMsgError()
+	{
+		$msg = (isset($_SESSION[User::SESSION_ERROR])) ? $_SESSION[User::SESSION_ERROR] : "";
+		User::clearMsgError();
+
+		return $msg;
+	}
+
+	// LIMPAR MENSAGENS DE ERRO
+	public static function clearMsgError()
+	{
+		$_SESSION[User::SESSION_ERROR] = NULL;
+	}
+
+	// SETAR ERRO DE REGISTRO DE USUÁRIO
+	public static function setErrorRegister($msg)
+	{
+		$_SESSION[User::ERROR_REGISTER] = $msg;
+
+	}
+
+	// RETORNAR REGISTRO DE USUÁRIO
+	public static function getErrorRegister()
+	{
+		$msg = (isset($_SESSION[User::ERROR_REGISTER]) 
+		&& $_SESSION[User::ERROR_REGISTER] != "") ? 
+		$_SESSION[User::ERROR_REGISTER] : "";
+
+		User::clearErrorRegister();
+
+		return $msg;
+
+	}
+
+	//LIMPAR MENSAGEM DE ERRO NO RESGISTRO
+	public static function clearErrorRegister()
+	{
+		$_SESSION[User::ERROR_REGISTER] = NULL;
+	} 
+
+
+	
+	// SETA A MENSAGEM DE SUCESSO NA ATUALIZAÇÃO DE CADASTRO
+	public static function setMsgSuccess($msg)
+	{
+		$_SESSION[User::SUCCESS] = $msg;
+
+	}
+
+	// RETORNA A MENSAGEM DE ERRO NA SESSÃO
+	public static function getMsgSuccess()
+	{
+		$msg = (isset($_SESSION[User::SUCCESS])) ? $_SESSION[User::SUCCESS] : "";
+		User::clearMsgSuccess();
+
+		return $msg;
+	}
+
+	// LIMPAR MENSAGENS DE ERRO
+	public static function clearMsgSuccess()
+	{
+		$_SESSION[User::SUCCESS] = NULL;
+	}
+
+
+	public static function checkLoginExist($login)
+	{
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT count(*) AS quantity FROM tb_users a 
+		INNER JOIN tb_persons b ON a.idperson = b.idperson 
+		WHERE a.deslogin = :deslogin 
+		|| b.desemail = :desemail", array(
+			':deslogin'=>$login,
+			':desemail'=>$login
+		));
+
+		return ((int)$results[0]['quantity'] > 0);
+	}
+
+	
 }
 
 

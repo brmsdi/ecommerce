@@ -79,10 +79,7 @@ $app->post('/admin/users/create', function(Request $request, Response $response)
 	$user->setData($_POST);
 	//var_dump($user);
 
-	//$user->save();
-
-	echo $_POST["despassword"];
-	exit;
+	$user->save();
 
 	//var_dump($request);
 	//echo "</br>";
