@@ -84,6 +84,28 @@ class Cart extends Model
 		}
 	}
 
+	// RECUPERAR CARRINHO APÓS O USUÁRIO REALIZAR LOGIN
+	public function getCartUser($iduser)
+	{
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT * FROM tb_carts a WHERE a.iduser IS NOT NULL AND a.iduser = :iduser", array(
+			":iduser"=>$iduser
+		));
+
+		if(count($results) > 0)
+		{
+			
+			$this->setData($results[0]);
+
+			$_SESSION[Cart::SESSION] = $this->getValues();
+			
+		}
+
+		
+
+	}
+
 	public function save()
 	{
 		$sql = new Sql();
@@ -173,7 +195,7 @@ class Cart extends Model
 	{
 		$sql = new Sql();
 
-		$row = $sql->select("SELECT 
+		$rows = $sql->select("SELECT 
 			b.idproduct, b.desproduct, b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl, b.desphoto, COUNT(*) AS nrqtd, SUM(b.vlprice) AS vltotal  
 			FROM tb_cartsproducts a
 			INNER JOIN tb_products b ON a.idproduct = b.idproduct 
@@ -183,7 +205,7 @@ class Cart extends Model
 				":idcart"=>$this->getidcart()
 			));
 
-		return $row;
+		return $rows;
 
 	}
 
@@ -241,21 +263,41 @@ class Cart extends Model
 			]);
 
 			$xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
-
-			$result = $xml->Servicos->cServico;
-
-			if($result->MsgErro != "0" || $result->MsgErro != "")
-			{
 				
-				$ms = $result->MsgErro;
-				Cart::setMsgError($ms);
+			//$xml = simplexml_load_string($xmlstring);
+			$json = json_encode($xml);
+			$xml = NULL;
+			$array = json_decode($json,TRUE);
+
+			$result = $array['Servicos']['cServico'];
+
+
+			//echo json_encode($xml);
+
+			//echo "" . $result['Codigo'] ;
+
+			//$result = $xml->Servicos->cServico;
+
+			if($result['Erro'] != "0" || $result['Erro'] != "")
+			{
+
+				if(count($result['MsgErro']) > 0)
+				{
+					foreach($result['MsgErro'] as $key => $value) 
+					{	
+						$ms = "" . $value;
+						Cart::setMsgError($ms);
+
+					}
+				}
+			
 
 			} else {
 				Cart::clearMsgError();
 			}
 
-			$this->setnrdays($result->PrazoEntrega);
-			$this->setvlfreight(Cart::formatToDecimal($result->Valor));
+			$this->setnrdays((int)$result['PrazoEntrega']);
+			$this->setvlfreight(Cart::formatToDecimal($result['Valor']));
 			$this->setnrzipcode($nrzipecode);
 
 		

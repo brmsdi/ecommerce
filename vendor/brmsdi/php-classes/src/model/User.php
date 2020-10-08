@@ -5,6 +5,7 @@ namespace Brmsdi\model;
 use Brmsdi\DB\Sql;
 use Brmsdi\Model;
 use Brmsdi\Mailer;
+use Brmsdi\model\Orderstatus;
 
 class User extends Model {
 
@@ -39,24 +40,29 @@ class User extends Model {
 			|| 
 			!$_SESSION[User::SESSION]
 			||
-			!(int)$_SESSION[User::SESSION]["iduser"] > 0
+			!((int)$_SESSION[User::SESSION]["iduser"]) > 0
 
 	    	)
 		{
+			
+			
 			return false;
 		} else {
 			
 			if($inadmin === true 
 				&& (bool)$_SESSION[User::SESSION]["inadmin"] == true )
 			{
+				
 				return true;
 
 			} else if($inadmin === false)
 			{
+			
 				return true;
 
 			} else 
 			{
+			
 				return false;
 			}
 		}
@@ -85,9 +91,11 @@ class User extends Model {
 			$user = new User();
 
 			$user->setData($data);
-
 			$_SESSION[User::SESSION] = $user->getValues();
 
+			//var_dump($_SESSION[User::SESSION]);
+			//var_dump($data);
+			
 			return $user;
 
 
@@ -108,6 +116,7 @@ class User extends Model {
 				header("Location: /admin/login");
 				
 			} else {
+				
 				header("Location: /login");
 			}
 			exit;
@@ -431,6 +440,30 @@ class User extends Model {
 
 		return ((int)$results[0]['quantity'] > 0);
 	}
+
+	public function getOrders()
+	{
+		$sql = new Sql();
+
+        $results = $sql->select(" SELECT * 
+        FROM tb_orders a
+        INNER JOIN tb_carts b USING(idcart) 
+        INNER JOIN tb_users c ON c.iduser = b.iduser 
+        INNER JOIN tb_persons d ON d.idperson = c.idperson 
+        INNER JOIN tb_addresses e ON e.idperson = d.idperson 
+        WHERE c.iduser = :iduser group by a.idorder", array(
+            ':iduser'=>$this->getiduser()
+		));
+		
+		if(count($results) > 0)
+		{
+			$results[0]['idstatus'] = Orderstatus::toStringStatus((int)$results[0]['idstatus']);
+
+		}
+		
+        return $results;
+	}
+	
 
 	
 }

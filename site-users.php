@@ -6,6 +6,9 @@ use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
+use Brmsdi\model\Address;
+use Brmsdi\model\Order;
+use Brmsdi\model\Cart;
 
 
 // ROTA PARA CADASTRO DE USUÁRIO 
@@ -207,7 +210,75 @@ $app->post('/profile', function(Request $request, Response $response)
     $_SESSION[User::SESSION] = $user->getValues();
 
     callHomeScreen("profile");
+    die;
     
+	return $response;
+
+});
+
+
+// ROTA PARA AS ORDENS DE SERVIÇOS ABERTAS
+$app->get('/profile/orders', function(Request $request, Response $response) 
+{
+    User::verifyLogin(false);
+    
+    $user = User::getFromSession();
+
+    $address = new Address();
+
+    $values = $user->getOrders();
+
+    foreach($values as $row)
+    {
+       // print_r($row);
+       $address->loadFromCEP($row['nrzipcode']);
+        //array_push($row, $address->getValues());
+
+       $row =  array_merge($row, $address->getValues());
+
+       $values[0] = array_merge($values[0], $row);
+
+    }
+
+    $page = new Page();
+
+    $page->setTpl("profile-orders", [
+        'orders'=>$values
+    ]);
+
+    die;
+	return $response;
+
+});
+
+
+$app->get('/profile/orders/{idorder}', function(Request $request, Response $response, $args) 
+{
+    User::verifyLogin(false);
+    
+    //$user = User::getFromSession();
+    $order = new Order();
+
+    $order->get((int) $args['idorder'] );
+
+    $cart = new Cart();
+
+    $cart->get((int)$order->getidcart());
+    
+    //$cart->setidcart($order->getidcart());
+
+    $products = $cart->getProducts();
+
+    $page = new Page();
+    
+    $page->setTpl("profile-orders-detail", [
+        'order'=>$order->getValues(),
+        'products'=>$products,
+        'cart'=>$cart->getValues()
+
+    ]);
+    die;
+
 	return $response;
 
 });

@@ -1,6 +1,7 @@
 <?php
 
 use \Brmsdi\model\User;
+use \Brmsdi\model\Cart;
 
 function formatPrice($vlprice)
 {
@@ -22,5 +23,22 @@ function getUserName()
     $user = User::getFromSession();
     return $user->getdesperson();
 }
+
+function getCartNrQtd()
+{
+    $cart = Cart::getFromSession();
+    $totals = $cart->getProductsTotals();
+
+    return $totals['quantity'];
+}
+
+function getCartVlSubTotal()
+{
+    $cart = Cart::getFromSession();
+    $totals = $cart->getProductsTotals();
+
+    return formatPrice($totals['vlprice']);
+}
+
 
 ?>

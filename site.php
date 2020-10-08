@@ -23,10 +23,12 @@ $app->get('/', function (Request $request, Response $response) {
 
 	Category::updateFile();
 
+	
 	$page->setTpl("index", [
 		"products"=>$products
-	]);
-
+	]); 
+	
+	die;
     return $response;
 });
 
@@ -60,7 +62,8 @@ $app->get('/categories/{idcategory}', function(Request $request, Response $respo
 		"products"=>$pagination["data"],
 		"pages"=>$pages
 	]);
-
+	
+	die;
 	return $response;
 
 });
@@ -79,7 +82,7 @@ $app->get("/products/{desurl}", function(Request $request, Response $response, $
 		"categories"=>$product->getCategories()
 	]);
 
-
+	die;
 	return $response;
 
 });
@@ -102,6 +105,7 @@ $app->get("/cart", function(Request $request, Response $response, $args )
 
 
 	return $response;
+	die;
 
 });
 
@@ -128,6 +132,7 @@ $app->get("/cart/{idproduct}/add", function(Request $request, Response $response
 
 
 	callHomeScreen("cart");
+	die;
 
 	return $response;
 
@@ -153,6 +158,7 @@ $app->get("/cart/{idproduct}/minus", function(Request $request, Response $respon
 
 
 	callHomeScreen("cart");
+	die;
 
 	return $response;
 
@@ -173,6 +179,7 @@ $app->get("/cart/{idproduct}/remove", function(Request $request, Response $respo
 	$cart->removeProduct($product, true);
 
 	callHomeScreen("cart");
+	die;
 
 	return $response;
 });
@@ -188,6 +195,7 @@ $app->post("/cart/freight", function(Request $request, Response $response)
 	$cart->setFreight($_POST["nrzipcode"]);
 
 	callHomeScreen("cart");
+	die;
 	return $response;
 
 });
@@ -197,6 +205,8 @@ $app->get("/checkout", function(Request $request, Response $response)
 {
 	User::verifyLogin(false);
 	$cart = Cart::getFromSession();
+
+	//$pathCheckout = $this->router->pathFor('checkout');
 
 	$address = new Address();
 
@@ -230,15 +240,17 @@ $app->get("/checkout", function(Request $request, Response $response)
 		'error'=>Address::getMsgError()
 	]);
 
-
+	//exit;
+	die;
 	return $response;
 
-});
+})->setName('checkout') ;
 
 
 // ROTA POST PARA FINALIZAR COMPRA
 $app->post("/checkout", function(Request $request, Response $response) 
 {
+	
 	User::verifyLogin(false);
 	$vazio  = false;
 
@@ -274,7 +286,6 @@ $app->post("/checkout", function(Request $request, Response $response)
 	$cart->getCalculateTotal();
 
 
-
 	$order->setData([
 		'idcart'=>$cart->getidcart(),
 		'iduser'=>$user->getiduser(),
@@ -286,6 +297,7 @@ $app->post("/checkout", function(Request $request, Response $response)
 	$order->save();
 
 	callHomeScreen('order/' . $order->getidorder());
+	die;
 	return $response;
 
 });
@@ -306,7 +318,7 @@ $app->get("/order/{idorder}", function(Request $request, Response $response, $ar
 		'order'=>$order->getValues()
 	]);
 
-
+	die;
 	return $response;
 
 });
@@ -382,12 +394,7 @@ $app->get("/boleto/{idorder}", function(Request $request, Response $response, $a
 
 	require_once($path."funcoes_itau.php");
 	require_once($path."layout_itau.php");
-
-	/*
-	include("include/funcoes_itau.php"); 
-	include("include/layout_itau.php"); */
-
-
+	die;
 	return $response;
 
 });
@@ -405,7 +412,8 @@ $app->get("/login", function(Request $request, Response $response)
 		"registerValues"=>(isset($_SESSION["registerValues"])) ? $_SESSION["registerValues"] : ['name'=>"", 'email'=>"",
 		'phone'=>"" ]
 	]);
-
+	
+	die;
 	return $response;
 
 });
@@ -417,11 +425,20 @@ $app->post("/login", function(Request $request, Response $response)
 	{
 		User::login($_POST["login"], $_POST["password"]);
 
+
+		$cart = new Cart();
+		
+		$cart->getCartUser($_SESSION[User::SESSION]['iduser']);
+
+
 	} catch(Exception $e)
 	{
 		User::setMsgError($e->getMessage());
 	}
 	callHomeScreen("checkout");
+	//die;
+	//$app->redirect('checkout');
+	die;
 	return $response;
 
 });
@@ -435,7 +452,13 @@ $app->get("/logout", function(Request $request, Response $response)
 	User::logout();
 
 	callHomeScreen("login");
+	die;
+
+	return $response;
 
 });
+
+
+
 
 ?>

@@ -33,7 +33,7 @@ require_once("site-users.php");
 function callHomeScreen($root)
 {
 	header("Location: /".$root);
-	exit;
+	//exit;
 
 }
 

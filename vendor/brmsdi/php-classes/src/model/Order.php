@@ -4,6 +4,7 @@ namespace Brmsdi\model;
 
 use Brmsdi\DB\Sql;
 use Brmsdi\Model;
+use Brmsdi\model\Orderstatus;
 
 class Order extends Model
 {
@@ -37,12 +38,13 @@ class Order extends Model
         INNER JOIN tb_users c ON c.iduser = b.iduser 
         INNER JOIN tb_persons d ON d.idperson = c.idperson 
         INNER JOIN tb_addresses e ON e.idperson = d.idperson 
-        WHERE a.idorder = :idorder", array(
+        WHERE a.idorder = :idorder group by a.idorder", array(
             ':idorder'=>$idorder
         ));
 
         if(count($results) > 0)
         {
+            $results[0]['idstatus'] = Orderstatus::toStringStatus((int)$results[0]['idstatus']);
             $this->setData($results[0]);
 
         }

@@ -12,6 +12,9 @@ class Address extends Model
 
     public static function getCEP($nrcep)
     {
+        try
+        {
+
         $nrcep = str_replace("-", "", $nrcep);
 
         $ch = curl_init();
@@ -27,6 +30,11 @@ class Address extends Model
         $data = json_decode(curl_exec($ch), true);
 
         curl_close($ch);
+
+        } catch(Exception $e)
+        {
+            throw new Exception("erro");
+        }
 
         return $data;
 
