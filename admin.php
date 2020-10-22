@@ -143,6 +143,7 @@ $app->post('/admin/login', function(Request $request, Response $response)
 	User::login($_POST["login"], $_POST["password"]);
 
 	callHomeScreen("admin");
+	die;
 
 });
 

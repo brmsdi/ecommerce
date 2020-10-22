@@ -34,7 +34,6 @@
         <div class="row">                
             <div class="col-md-3">
                 <?php require $this->checkTemplate("profile-menu");?>
-
             </div>
             <div class="col-md-9">
                 
@@ -49,7 +48,6 @@
                         </thead>
                         <tbody>
                             <?php $counter1=-1;  if( isset($products) && ( is_array($products) || $products instanceof Traversable ) && sizeof($products) ) foreach( $products as $key1 => $value1 ){ $counter1++; ?>
-
                             <tr class="cart_item">
                                 <td class="product-name">
                                     <?php echo htmlspecialchars( $value1["desproduct"], ENT_COMPAT, 'UTF-8', FALSE ); ?> <strong class="product-quantity">× <?php echo htmlspecialchars( $value1["nrqtd"], ENT_COMPAT, 'UTF-8', FALSE ); ?></strong> 
@@ -59,7 +57,6 @@
                                 </td>
                             </tr>
                             <?php } ?>
-
                         </tbody>
                         <tfoot>
                             <tr class="cart-subtotal">
@@ -71,7 +68,6 @@
                                 <th>Frete</th>
                                 <td>
                                     R$<?php echo htmlspecialchars( $cart["vlfreight"], ENT_COMPAT, 'UTF-8', FALSE ); ?>
-
                                     <input type="hidden" class="shipping_method" value="free_shipping" id="shipping_method_0" data-index="0" name="shipping_method[0]">
                                 </td>
                             </tr>

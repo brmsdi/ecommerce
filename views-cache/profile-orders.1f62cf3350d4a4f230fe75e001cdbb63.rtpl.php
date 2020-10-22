@@ -1,5 +1,4 @@
 <?php if(!class_exists('Rain\Tpl')){exit;}?>
-
 <div class="product-big-title-area">
     <div class="container">
         <div class="row">
@@ -18,7 +17,6 @@
         <div class="row">                
             <div class="col-md-3">
                 <?php require $this->checkTemplate("profile-menu");?>
-
             </div>
             <div class="col-md-9">
                 
@@ -38,7 +36,6 @@
                     </thead>
                     <tbody>
                         <?php $counter1=-1;  if( isset($orders) && ( is_array($orders) || $orders instanceof Traversable ) && sizeof($orders) ) foreach( $orders as $key1 => $value1 ){ $counter1++; ?>
-
                         <tr>
                             <th scope="row"><?php echo htmlspecialchars( $value1["idorder"], ENT_COMPAT, 'UTF-8', FALSE ); ?></th>
                             <td>R$<?php echo formatPrice($value1["vltotal"]); ?></td>
@@ -50,12 +47,10 @@
                             </td>
                         </tr>
                         <?php }else{ ?>
-
                         <div class="alert alert-info">
                             Nenhum pedido foi encontrado.
                         </div>
                         <?php } ?>
-
                     </tbody>
                 </table>
 
