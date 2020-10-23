@@ -9,12 +9,13 @@ use Brmsdi\model\User;
 
 $app->get('/admin', function (Request $request, Response $response) {
    // $response->getBody()->write('<a href="/hello/world">Try /hello/world</a>');
-	
+
 	User::verifyLogin();
 
 	$page = new PageAdmin();
 
 	$page->setTpl("index");
+	die;
 
     return $response;
 });
@@ -29,6 +30,7 @@ $app->get('/admin/login', function(Request $request, Response $response)
 
 
 	$page->setTpl("login");
+	die;
 
 	return $response;
 
@@ -40,6 +42,7 @@ $app->get('/admin/logout', function(Request $request, Response $response)
 	User::logout();
 
 	callHomeScreen("admin/login");
+	die;
 
 	return $response;
 });
@@ -56,6 +59,7 @@ $app->get('/admin/forgot', function(Request $request, Response $response)
 	]);
 
 	$page->setTpl("forgot");
+	die;
 	
 	return $response;
 });
@@ -66,6 +70,7 @@ $app->post('/admin/forgot', function(Request $request, Response $response)
 	
 	$user = User::getForgot($_POST["email"]);
 	callHomeScreen("admin/forgot/send");
+	die;
 
 });
 
@@ -141,6 +146,7 @@ $app->post('/admin/forgot/reset', function(Request $request, Response $response)
 $app->post('/admin/login', function(Request $request, Response $response) 
 {
 	User::login($_POST["login"], $_POST["password"]);
+
 
 	callHomeScreen("admin");
 	die;

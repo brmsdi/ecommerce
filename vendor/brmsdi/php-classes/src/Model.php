@@ -11,7 +11,7 @@ class Model
 		$method = substr($name, 0, 3);
 		$fieldname = substr($name, 3, strlen($name));
 
-		//echo "c: " . $fieldname;
+		//echo "c: " . $method . " " . $fieldname . "<br>";
 		
 
 		switch ($method) {
@@ -29,7 +29,7 @@ class Model
 				break;
 			
 			default:
-				# code...
+				
 				break;
 		}
 	}
@@ -39,9 +39,13 @@ class Model
 		
 		try
 		{
+			
 			foreach ($data as $key => $value) 
 			{
-				$this->{"set".$key}($value);
+			
+				$method = "set".$key;
+				
+				$this->{$method}($value);
 			}
 			
 		}catch(Exception $erro) {
@@ -51,6 +55,8 @@ class Model
 			"file"=>$erro->getFile(),
 			"code"=>$erro->getCode()
 			));
+
+			die;
 
 		}
 	}
