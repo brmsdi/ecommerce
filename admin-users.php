@@ -5,19 +5,43 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Brmsdi\Page;
 use Brmsdi\PageAdmin;
+use Brmsdi\Pagination;
+use Brmsdi\PaginationSearch;
 use Brmsdi\model\User;
 
 
 $app->get('/admin/users', function(Request $request, Response $response) 
 {
 	User::verifyLogin();
+	// $request->getQueryParams() 
 
-	$users = User::listAll();
+	$params = $request->getQueryParams();
+
+	$search = (isset($params['search'])) ? $params['search'] : "";
+
+	$currentPage = (isset($params['page'])) ? (int)$params['page'] : 1; 
+	
+	$user = new User();
+	$pagination;
+
+	if($search != "") 
+	{
+		$pagination = new PaginationSearch($user, $search, $currentPage);
+
+	} else {
+
+		$pagination = new Pagination($user, $currentPage);
+	
+	}
+
 
 	$page = new PageAdmin();
 
-	$page->setTpl("users", array(
-		"users"=>$users
+	$page->setTpl('users', array(
+		'users'=>$pagination->getPaginationData(),
+		'search'=>$search, 
+		'pages'=> $pagination->getPages(), 
+		'msgSearch'=>User::getMsgError()
 	));
 	
 	return $response;

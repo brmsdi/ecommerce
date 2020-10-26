@@ -8,6 +8,8 @@ use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
 use Brmsdi\model\Category;
 use Brmsdi\model\Product;
+use Brmsdi\Pagination;
+use Brmsdi\PaginationSearch;
 
 // ROTA PARA A TELA DE CATEGORIAS 
 $app->get('/admin/categories', function(Request $request, Response $response)
@@ -15,12 +17,36 @@ $app->get('/admin/categories', function(Request $request, Response $response)
 
 	User::verifyLogin();
 
+	$params = $request->getQueryParams();
+
+	$search = (isset($params['search'])) ? $params['search'] : "";
+
+	$currentPage = (isset($params['page'])) ? (int)$params['page'] : 1;
+
+	$category = new Category();
+	$pagination;
+
+	if($search != "") 
+	{
+		$pagination = new PaginationSearch($category, $search, $currentPage);
+
+	} else {
+
+		$pagination = new Pagination($category, $currentPage);
+	
+	}
+
 	$page = new PageAdmin();
-
-	$categories = Category::listAll();
-
+	/*
+		'users'=>$pagination->getPaginationData(),
+		'search'=>$search, 
+		'pages'=> $pagination->getPages(), 
+	*/
 	$page->setTpl('categories', [
-		"categories"=>$categories
+		"categories"=>$pagination->getPaginationData(),
+		'search'=>$search, 
+		'pages'=> $pagination->getPages(),
+		'msgSearch'=>Category::getMsgError()
 	]);
 
 	return $response;

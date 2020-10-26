@@ -6,8 +6,9 @@ use Brmsdi\DB\Sql;
 use Brmsdi\Model;
 use Brmsdi\Mailer;
 use Brmsdi\model\Orderstatus;
+use Brmsdi\interfaces\PaginationInterface;
 
-class User extends Model {
+class User extends Model implements PaginationInterface {
 
 	const SESSION = "User";
 	const SECRET_IV = "1234567891234567";
@@ -464,6 +465,70 @@ class User extends Model {
         return $results;
 	}
 	
+	// PAGINAÇÃO 
+	public function getPage($page = 1, $itemsPerPage= 10)
+	{
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT sql_calc_found_rows * 
+		    FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson) 
+			ORDER BY desperson
+			LIMIT $start, $itemsPerPage");
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() 
+			AS nrtotal");
+
+		if(( (int) $resultTotal[0]['nrtotal']) < 1) 
+		{
+			User::setMsgError("Nenhum registro encontrado!");
+		}
+			
+
+		return [
+			"data"=>$results,
+			"total"=>$resultTotal[0]["nrtotal"],
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+
+		];
+
+	}
+
+	// Paginá com busca
+	public function getPageSearch($search, $page = 1, $itemsPerPage = 10 ) 
+	{
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT sql_calc_found_rows * 
+		    FROM tb_users a 
+			INNER JOIN tb_persons b USING(idperson) 
+			WHERE b.desperson LIKE :search OR b.desemail = :searchEmail 
+			ORDER BY desperson
+			LIMIT $start, $itemsPerPage", array(
+				':search'=>'%'.$search.'%',
+				'searchEmail'=>$search
+			));
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() 
+			AS nrtotal");
+
+		if(( (int) $resultTotal[0]['nrtotal']) < 1) 
+		{
+			User::setMsgError("Nenhum registro encontrado!");
+		}
+	
+
+		return [
+			"data"=>$results,
+			"total"=>$resultTotal[0]["nrtotal"],
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+
+		];
+	}
 
 	
 }

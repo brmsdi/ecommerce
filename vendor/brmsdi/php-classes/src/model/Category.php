@@ -4,9 +4,12 @@ namespace Brmsdi\model;
 
 use Brmsdi\DB\Sql;
 use Brmsdi\Model;
+use Brmsdi\interfaces\PaginationInterface;
 
-class Category extends Model 
+class Category extends Model implements PaginationInterface
 {
+
+	const SESSION_ERROR = "categoryError";
 
 	public static function listAll()
 	{
@@ -173,6 +176,91 @@ class Category extends Model
 
 		];
 
+	}
+
+
+	// PAGINAÇÃO 
+	public function getPage($page = 1, $itemsPerPage= 10)
+	{
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT sql_calc_found_rows * 
+		    FROM tb_categories
+			ORDER BY descategory
+			LIMIT $start, $itemsPerPage");
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() 
+			AS nrtotal");
+
+		if(( (int) $resultTotal[0]['nrtotal']) < 1) 
+		{
+			Category::setMsgError("Nenhum registro encontrado!");
+		}
+			
+
+		return [
+			"data"=>$results,
+			"total"=>$resultTotal[0]["nrtotal"],
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+
+		];
+
+	}
+
+	// Paginá com busca
+	public function getPageSearch($search, $page = 1, $itemsPerPage = 10 ) 
+	{
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("SELECT sql_calc_found_rows * 
+		    FROM tb_categories b 
+			WHERE b.descategory LIKE :search 
+			ORDER BY b.descategory 
+			LIMIT $start, $itemsPerPage", array(
+				':search'=>'%'.$search.'%'
+			));
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() 
+			AS nrtotal");
+
+		if(( (int) $resultTotal[0]['nrtotal']) < 1) 
+		{
+			Category::setMsgError("Nenhum registro encontrado!");
+		}
+	
+
+		return [
+			"data"=>$results,
+			"total"=>$resultTotal[0]["nrtotal"],
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+
+		];
+	}
+
+	// SETA O ERRO NA SESSÃO
+	public static function setMsgError($msg)
+	{
+		$_SESSION[Category::SESSION_ERROR] = $msg;
+
+	}
+
+	// RETORNA A MENSAGEM DE ERRO NA SESSÃO
+	public static function getMsgError()
+	{
+		$msg = (isset($_SESSION[Category::SESSION_ERROR])) ? $_SESSION[Category::SESSION_ERROR] : "";
+		Category::clearMsgError();
+
+		return $msg;
+	}
+
+	// LIMPAR MENSAGENS DE ERRO
+	public static function clearMsgError()
+	{
+		$_SESSION[Category::SESSION_ERROR] = NULL;
 	}
 
 }
