@@ -60,7 +60,7 @@ $app->post("/register", function(Request $request, Response $response)
     User::login($_POST["email"], $_POST["password"]);
     
     callHomeScreen("checkout");
-
+    die;
     return $response;
 });
 
@@ -73,7 +73,7 @@ $app->get('/forgot', function(Request $request, Response $response)
 	$page = new Page();
 
 	$page->setTpl("forgot");
-	
+	die;
 	return $response;
 });
 
@@ -82,7 +82,8 @@ $app->post('/forgot', function(Request $request, Response $response)
 {
 	
 	$user = User::getForgot($_POST["email"], false);
-	callHomeScreen("forgot/send");
+    callHomeScreen("forgot/send");
+    die;
 
 });
 
@@ -93,7 +94,7 @@ $app->get('/forgot/send', function(Request $request, Response $response)
 	$page = new Page();
 
 	$page->setTpl("forgot-send");
-	
+	die;
 	return $response;
 
 });
@@ -112,7 +113,7 @@ $app->get('/forgot/reset', function(Request $request, Response $response)
 		"code"=>$_GET["code"]
 	));
 	
-	
+	die;
 	return $response;
 
 });
@@ -139,7 +140,7 @@ $app->post('/forgot/reset', function(Request $request, Response $response) {
 
 	$page->setTpl("forgot-reset-success");
 	
-
+    die;
 	return $response;
 
 });
@@ -161,7 +162,7 @@ $app->get('/profile', function(Request $request, Response $response)
         'profileMsg'=>User::getMsgSuccess(),
         "profileError"=>User::getMsgError()
     ]);
-
+    die;
 	return $response;
 
 });

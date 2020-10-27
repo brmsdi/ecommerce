@@ -7,6 +7,8 @@ use Brmsdi\Page;
 use Brmsdi\PageAdmin;
 use Brmsdi\model\User;
 use Brmsdi\model\Product;
+use Brmsdi\Pagination;
+use Brmsdi\PaginationSearch;
 
 
 // ROTA PARA CHAMAR A TELA DE PRODUTOS
@@ -14,16 +16,39 @@ $app->get("/admin/products", function(Request $request, Response $response) {
 
 	User::verifyLogin();
 
+	
+	$params = $request->getQueryParams();
+
+	$search = (isset($params['search'])) ? $params['search'] : "";
+
+	$currentPage = (isset($params['page'])) ? (int)$params['page'] : 1; 
+	
+	$product = new Product();
+	$pagination;
+
+	if($search != "") 
+	{
+		$pagination = new PaginationSearch($product, $search, $currentPage);
+
+	} else {
+
+		$pagination = new Pagination($product, $currentPage);
+	
+	}
+
 	$page = new PageAdmin();
 
-	$products = Product::listAll();
+	//$products = Product::listAll();
 
 	/*setlocale(LC_MONETARY, 'pt_br');
 	echo number_format($products[0]["vlprice"], 2, ',','.');
 	exit; */
 
 	$page->setTpl("products", [
-		"products"=>$products
+		"products"=>$pagination->getPaginationData(),
+		'search'=>$search, 
+		'pages'=> $pagination->getPages(), 
+		'msgSearch'=>Product::getMsgError()
 	]); 
 
 	return $response;

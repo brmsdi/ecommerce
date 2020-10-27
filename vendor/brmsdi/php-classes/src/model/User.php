@@ -90,15 +90,13 @@ class User extends Model implements PaginationInterface {
 		if(password_verify($password, $data["despassword"]) === true)
 		{
 			$user = new User();
-
 			$user->setData($data);
 			$_SESSION[User::SESSION] = $user->getValues();
 
 			//var_dump($_SESSION[User::SESSION]);
 			//var_dump($data);
 			
-			return $user;
-
+		
 
 		} else 
 		{
@@ -490,7 +488,8 @@ class User extends Model implements PaginationInterface {
 		return [
 			"data"=>$results,
 			"total"=>$resultTotal[0]["nrtotal"],
-			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage),
+			"path"=>"users"
 
 		];
 
@@ -525,7 +524,8 @@ class User extends Model implements PaginationInterface {
 		return [
 			"data"=>$results,
 			"total"=>$resultTotal[0]["nrtotal"],
-			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage),
+			"path"=>"users"
 
 		];
 	}

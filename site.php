@@ -103,10 +103,9 @@ $app->get("/cart", function(Request $request, Response $response, $args )
 		"error"=>Cart::getMsgError()
 		]);
 
-
-	return $response;
 	die;
-
+	return $response;
+	
 });
 
 // ROTA PARA ADICIONAR PRODUTO NO CARRINHO
@@ -206,6 +205,7 @@ $app->get("/checkout", function(Request $request, Response $response)
 	User::verifyLogin(false);
 	$cart = Cart::getFromSession();
 
+	
 	//$pathCheckout = $this->router->pathFor('checkout');
 
 	$address = new Address();
@@ -244,7 +244,7 @@ $app->get("/checkout", function(Request $request, Response $response)
 	die;
 	return $response;
 
-})->setName('checkout') ;
+});
 
 
 // ROTA POST PARA FINALIZAR COMPRA
@@ -268,6 +268,7 @@ $app->post("/checkout", function(Request $request, Response $response)
 	if($vazio)
 	{
 		callHomeScreen("checkout");
+		die;
 	}
 
 
@@ -281,20 +282,28 @@ $app->post("/checkout", function(Request $request, Response $response)
 
 	$cart = Cart::getFromSession();
 
+	if($cart->getidcart() > 0) 
+	{
+		$cart->setiduser((int) $user->getiduser() );
+		$cart->save();
+
+	}
+
 	$order = new Order();
 
 	$cart->getCalculateTotal();
 
-
 	$order->setData([
 		'idcart'=>$cart->getidcart(),
-		'iduser'=>$user->getiduser(),
 		'idstatus'=>Orderstatus::EM_ABERTO,
 		'vltotal'=>$cart->getvltotal()
 
 	]);
 
+	
 	$order->save();
+
+	
 
 	callHomeScreen('order/' . $order->getidorder());
 	die;
@@ -424,11 +433,13 @@ $app->post("/login", function(Request $request, Response $response)
 	try
 	{
 		User::login($_POST["login"], $_POST["password"]);
-
+		$_SESSION["registerValues"] = null;
 
 		$cart = new Cart();
-		
-		$cart->getCartUser($_SESSION[User::SESSION]['iduser']);
+
+		Cart::getFromSession();
+
+		//$cart->getCartUser($_SESSION[User::SESSION]['iduser']);
 
 
 	} catch(Exception $e)
@@ -450,10 +461,10 @@ $app->post("/login", function(Request $request, Response $response)
 $app->get("/logout", function(Request $request, Response $response) 
 {
 	User::logout();
+	Cart::outSession();
 
 	callHomeScreen("login");
 	die;
-
 	return $response;
 
 });

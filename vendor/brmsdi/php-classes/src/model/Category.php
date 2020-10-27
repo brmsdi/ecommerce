@@ -203,7 +203,8 @@ class Category extends Model implements PaginationInterface
 		return [
 			"data"=>$results,
 			"total"=>$resultTotal[0]["nrtotal"],
-			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage),
+			"path"=>"categories"
 
 		];
 
@@ -236,7 +237,8 @@ class Category extends Model implements PaginationInterface
 		return [
 			"data"=>$results,
 			"total"=>$resultTotal[0]["nrtotal"],
-			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage)
+			"pages"=>ceil((int)$resultTotal[0]["nrtotal"] / $itemsPerPage),
+			"path"=>"categories"
 
 		];
 	}

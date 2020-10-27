@@ -43,7 +43,7 @@ $app->get('/admin/users', function(Request $request, Response $response)
 		'pages'=> $pagination->getPages(), 
 		'msgSearch'=>User::getMsgError()
 	));
-	
+	die;
 	return $response;
 });
 
@@ -55,6 +55,7 @@ $app->get('/admin/users/create', function(Request $request, Response $response)
 	$page = new PageAdmin();
 
 	$page->setTpl("users-create");
+	die;
 	
 	return $response;
 });
@@ -71,6 +72,7 @@ $app->get('/admin/users/{iduser}/delete', function(Request $request, Response $r
 	$user->delete();
 
 	callHomeScreen("admin/users");
+	die;
 	
 });
 
@@ -88,7 +90,7 @@ $app->get('/admin/users/{iduser}', function(Request $request, Response $response
 	$page->setTpl("users-update", array(
 		"user"=>$user->getValues()
 	));
-	
+	die;
 	return $response;
 });
 
@@ -111,7 +113,7 @@ $app->post('/admin/users/create', function(Request $request, Response $response)
 	//exit;
 
 	callHomeScreen("admin/users");
-
+	die;
 	return $response;
 
 });
@@ -131,7 +133,7 @@ $app->post('/admin/users/{iduser}', function(Request $request, Response $respons
 	$user->update();
 
 	callHomeScreen("admin/users");
-
+	die;
 	return $response;
 	
 });

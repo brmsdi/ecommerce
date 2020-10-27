@@ -24,7 +24,7 @@ class Pagination
         for($x = 0; $x < $this->pagination['pages']; $x++) 
         {
             array_push($this->pages, [
-                'href'=>"/admin/users?". http_build_query([
+                'href'=>"/admin/". $this->pagination['path'] ."?". http_build_query([
                     'page'=>$x+1,
                     'search'=>$search
                 ]),

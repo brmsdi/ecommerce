@@ -20,6 +20,10 @@ class Cart extends Model
 		if(isset($_SESSION[Cart::SESSION]) && ( (int)$_SESSION[Cart::SESSION]["idcart"] > 0 ) )
 		{
 			$cart->get( (int) $_SESSION[Cart::SESSION]["idcart"]);
+
+
+			//echo "recuperou";
+			//die;
 			
 
 		} else {
@@ -46,7 +50,7 @@ class Cart extends Model
 			}
 
 		}
-
+		//$cart->setToSession();
 		return $cart;
 	}
 
@@ -84,6 +88,7 @@ class Cart extends Model
 		}
 	}
 
+	/*
 	// RECUPERAR CARRINHO APÓS O USUÁRIO REALIZAR LOGIN
 	public function getCartUser($iduser)
 	{
@@ -92,7 +97,7 @@ class Cart extends Model
 		$results = $sql->select("SELECT * FROM tb_carts a WHERE a.iduser IS NOT NULL AND a.iduser = :iduser", array(
 			":iduser"=>$iduser
 		));
-
+		
 		if(count($results) > 0)
 		{
 			
@@ -104,7 +109,7 @@ class Cart extends Model
 
 		
 
-	}
+	} */
 
 	public function save()
 	{
@@ -365,6 +370,12 @@ class Cart extends Model
 		$this->setvlsubtotal($totals["vlprice"]);
 		$this->setvltotal($totals["vlprice"] 
 		+  $this->getvlfreight());
+
+	}
+
+	public static function outSession()
+	{
+		$_SESSION[Cart::SESSION] = NULL;
 
 	}
 
