@@ -456,12 +456,11 @@ $app->post("/login", function(Request $request, Response $response)
 
 
 // ROTA PARA FAZER LOGOUT 
-
-// ROTA PARA RECEBER LOGIN E SENHA DO USUÁRIO
 $app->get("/logout", function(Request $request, Response $response) 
 {
 	User::logout();
 	Cart::outSession();
+	$_SESSION["registerValues"] = null;
 
 	callHomeScreen("login");
 	die;

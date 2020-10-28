@@ -34,7 +34,6 @@ $app->get('/admin/users', function(Request $request, Response $response)
 	
 	}
 
-
 	$page = new PageAdmin();
 
 	$page->setTpl('users', array(
